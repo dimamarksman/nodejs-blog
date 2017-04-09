@@ -1,0 +1,1 @@
+export const lazyLoading = (name, index = false) => () => System.import(`../components/${name}${index ? '/index' : ''}.vue`);
