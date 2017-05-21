@@ -6,20 +6,29 @@ Vue.use(Router);
 
 const router = new Router({
   mode: 'hash',
-  linkActiveClass: 'is-active',
+  linkActiveClass: 'active',
   scrollBehavior: () => ({
     y: 0
   }),
-  routes: [{
-      path: '/',
-      redirect: '/articles'
-    },
+  routes: [
     {
-      path: '/articles',
+      path: '/',
       components: {
-        default: lazyLoading('articles', true)
+        default: lazyLoading('home', true)
       }
     },
+    {
+      path: '/articles/:articleId',
+      components: {
+        default: lazyLoading('article', true)
+      }
+    },
+    {
+      path: '/about',
+      components: {
+        default: lazyLoading('about', true)
+      }
+    }
   ]
 });
 
@@ -39,20 +48,5 @@ const _setBodyClass = (matched) => {
     document.body.className = '';
   }
 };
-
-/**
- * Protecting routes
- */
-router.beforeEach((to, from, next) => {
-  let token = localStorage.getItem('jwt-token'),
-    stop = false;
-
-  //set bodyClass
-  _setBodyClass(to.matched);
-
-  if (!stop) {
-    return next();
-  }
-});
 
 export default router;

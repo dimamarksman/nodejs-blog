@@ -3,12 +3,12 @@ import VueResource from 'vue-resource';
 
 Vue.use(VueResource);
 
-export default class ApiService {
+export class ApiService {
   constructor() {
     this.api = Vue.http;
     this.prefix = '/api/';
   }
-  get(url, isTextRes = false, query) {
+  get(url, query, isTextRes = false) {
     return this.api.get(this.prefix + url, {
       params: query
     }).then(res => {
@@ -34,4 +34,13 @@ export default class ApiService {
   getArticles() {
     return this.get('articles');
   }
+  getTags() {
+    return this.get('tags');
+  }
+  getArticle(articleId) {
+    return this.get(`articles/${articleId}`);
+  }
 }
+
+
+export default new ApiService();

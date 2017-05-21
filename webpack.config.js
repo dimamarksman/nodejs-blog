@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 let env = (process.env.NODE_ENV || 'development').trim();
 let isProd = env === 'production';
@@ -11,8 +12,9 @@ let config = {
   context: path.join(__dirname, './client/src'),
   entry: './js/app.js',
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'public')
+    filename: '[name].[hash].bundle.js',
+    chunkFilename: '[id].[chunkhash].bundle.js',
+    path: path.resolve(__dirname, 'dist')
   },
   devServer: {
     contentBase: './client/src',
@@ -30,8 +32,9 @@ let config = {
     rules: [{
         test: /\.js$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'buble-loader'
+        loader: 'buble-loader',
+        query: {
+          objectAssign: 'Object.assign'
         }
       },
       {
@@ -56,8 +59,11 @@ let config = {
       },
       {
         test: /\.vue$/,
-        use: {
-          loader: 'vue-loader'
+        loader: 'vue-loader',
+        options: {
+          buble: {
+            objectAssign: 'Object.assign'
+          }
         }
       },
       {
@@ -85,10 +91,13 @@ let config = {
 };
 
 if (!isProd) {
-  config.devtool = "inline-source-map";
+  config.devtool = "source-map";
 }
 
 config.plugins = [
+  // Remove old dist folder to start fresh
+  new CleanWebpackPlugin(['dist']),
+
   // Global environment variable to determine dev/prod in code
   new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
@@ -96,13 +105,11 @@ config.plugins = [
 
   new webpack.HotModuleReplacementPlugin(),
 
-  // Copy main app index file into dist root
-  new CopyWebpackPlugin([{
-    from: 'index.html'
-  }]),
-
-  // Remove old dist folder to start fresh
-  new CleanWebpackPlugin(['dist']),
+  // Simplifies creation of HTML files to serve your webpack bundles
+  new HtmlWebpackPlugin({
+    title: 'NodeJS Blog App',
+    template: 'index.ejs'
+  }),
 
   // Provide polyfill for browers that dont support promises
   new webpack.ProvidePlugin({
